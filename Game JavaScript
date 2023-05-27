@@ -1,0 +1,107 @@
+// Set up the canvas
+const canvas = document.createElement("canvas");
+const context = canvas.getContext("2d");
+canvas.width = 800;
+canvas.height = 600;
+document.body.appendChild(canvas);
+document.title = "Polygon Game";
+
+// Load sound effects and music
+const collisionSound = new Audio("collision.wav");
+const powerupSound = new Audio("powerup.wav");
+const gameOverSound = new Audio("game_over.wav");
+const backgroundMusic = new Audio("background_music.mp3");
+
+// Play background music
+backgroundMusic.loop = true;
+backgroundMusic.play();
+
+// Define player attributes
+let playerX = 400;
+let playerY = 300;
+const playerSize = 50;
+const playerSpeed = 5;
+
+// Define enemy attributes
+let enemyX = Math.floor(Math.random() * 800);
+let enemyY = Math.floor(Math.random() * 600);
+const enemySize = 50;
+const enemySpeed = 2;
+
+// Define power-up attributes
+let powerupX = Math.floor(Math.random() * 800);
+let powerupY = Math.floor(Math.random() * 600);
+const powerupSize = 30;
+
+// Define game states
+const STATE_PLAYING = 0;
+const STATE_GAME_OVER = 1;
+let gameState = STATE_PLAYING;
+
+// Define score
+let score = 0;
+
+// Game loop
+function gameLoop() {
+  // Handle events
+  document.addEventListener("keydown", handleKeyDown);
+
+  // Move the player
+  function handleKeyDown(event) {
+    switch (event.key) {
+      case "ArrowLeft":
+        playerX -= playerSpeed;
+        break;
+      case "ArrowRight":
+        playerX += playerSpeed;
+        break;
+      case "ArrowUp":
+        playerY -= playerSpeed;
+        break;
+      case "ArrowDown":
+        playerY += playerSpeed;
+        break;
+    }
+  }
+
+  // Clear the screen
+  context.fillStyle = "#000000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw the player
+  context.fillStyle = "#ff0000";
+  context.beginPath();
+  context.arc(playerX, playerY, playerSize, 0, Math.PI * 2);
+  context.closePath();
+  context.fill();
+
+  // Draw the enemy
+  context.fillStyle = "#00ff00";
+  context.beginPath();
+  context.arc(enemyX, enemyY, enemySize, 0, Math.PI * 2);
+  context.closePath();
+  context.fill();
+
+  // Draw the power-up
+  context.fillStyle = "#0000ff";
+  context.beginPath();
+  context.arc(powerupX, powerupY, powerupSize, 0, Math.PI * 2);
+  context.closePath();
+  context.fill();
+
+  // Check collision
+  const distance = Math.sqrt((playerX - enemyX) ** 2 + (playerY - enemyY) ** 2);
+  if (distance < playerSize + enemySize) {
+    gameState = STATE_GAME_OVER;
+    enemyX = Math.floor(Math.random() * 800);
+    enemyY = Math.floor(Math.random() * 600);
+    collisionSound.play(); // Play collision sound effect
+  }
+
+  // Check if player collects a power-up
+  const powerupDistance = Math.sqrt((playerX - powerupX) ** 2 + (playerY - powerupY) ** 2);
+  if (powerupDistance < playerSize + powerupSize) {
+    score += 5;
+    powerupX = Math.floor(Math.random() * 800);
+    powerupY = Math.floor(Math.random() * 600);
+    powerupSound.play(); // Play power-up sound effect
