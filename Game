@@ -1,0 +1,96 @@
+import pygame
+import random
+
+# Initialize the game
+pygame.init()
+
+# Set up the display
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Polygon Game")
+
+# Load sound effects and music
+collision_sound = pygame.mixer.Sound("collision.wav")
+powerup_sound = pygame.mixer.Sound("powerup.wav")
+game_over_sound = pygame.mixer.Sound("game_over.wav")
+background_music = pygame.mixer.music.load("background_music.mp3")
+
+# Play background music
+pygame.mixer.music.play(-1)  # -1 plays the music in an infinite loop
+
+# Define player attributes
+player_x = 400
+player_y = 300
+player_size = 50
+player_speed = 5
+
+# Define enemy attributes
+enemy_x = random.randint(0, 800)
+enemy_y = random.randint(0, 600)
+enemy_size = 50
+enemy_speed = 2
+
+# Define power-up attributes
+powerup_x = random.randint(0, 800)
+powerup_y = random.randint(0, 600)
+powerup_size = 30
+
+# Define game states
+STATE_PLAYING = 0
+STATE_GAME_OVER = 1
+game_state = STATE_PLAYING
+
+# Define score
+score = 0
+
+# Game loop
+running = True
+while running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Move the player
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        player_x -= player_speed
+    if keys[pygame.K_RIGHT]:
+        player_x += player_speed
+    if keys[pygame.K_UP]:
+        player_y -= player_speed
+    if keys[pygame.K_DOWN]:
+        player_y += player_speed
+
+    # Clear the screen
+    screen.fill((0, 0, 0))
+
+    # Draw the player
+    pygame.draw.circle(screen, (255, 0, 0), (player_x, player_y), player_size)
+
+    # Draw the enemy
+    pygame.draw.circle(screen, (0, 255, 0), (enemy_x, enemy_y), enemy_size)
+
+    # Draw the power-up
+    pygame.draw.circle(screen, (0, 0, 255), (powerup_x, powerup_y), powerup_size)
+
+    # Check collision
+    distance = ((player_x - enemy_x) ** 2 + (player_y - enemy_y) ** 2) ** 0.5
+    if distance < player_size + enemy_size:
+        game_state = STATE_GAME_OVER
+        enemy_x = random.randint(0, 800)
+        enemy_y = random.randint(0, 600)
+        collision_sound.play()  # Play collision sound effect
+
+    # Check if player collects a power-up
+    powerup_distance = ((player_x - powerup_x) ** 2 + (player_y - powerup_y) ** 2) ** 0.5
+    if powerup_distance < player_size + powerup_size:
+        score += 5
+        powerup_x = random.randint(0, 800)
+        powerup_y = random.randint(0, 600)
+        powerup_sound.play()  # Play power-up sound effect
+
+    # Update the display
+    pygame.display.flip()
+
+# Clean up the game
+pygame.quit()
